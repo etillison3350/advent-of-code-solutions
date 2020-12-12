@@ -50,7 +50,7 @@ def find_test_cases(day: int = None, year: int = None, cached = False) -> List[s
     if year is None:
         year = today.year
 
-    file_name = 'testcases-{:0>4}{:0>2}.txt'.format(year, day)
+    file_name = 'testcases-{:0>4}{:0>2}.json'.format(year, day)
     if cached:
         try:
             with open(file_name, 'r') as tc_file:

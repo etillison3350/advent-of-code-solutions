@@ -15,11 +15,15 @@ def wait_for_input(day: int = None, year: int = None):
         day = today.day
     if year is None:
         year = today.year
+    num_waits = 0
     while True:
         today = date.today()
         if today.year * 32 * 12 + today.month * 32 + today.day >= year * 32 * 12 + 12 * 32 + day:
             break
         sleep(1)
+        if num_waits % 60 == 0:
+            print('Waiting until {}-12-{}...'.format(year, day))
+        num_waits += 1
 
 def input_text(day: int = None, year: int = None) -> str:
     today = date.today()
@@ -54,7 +58,7 @@ def find_test_cases(day: int = None, year: int = None, cached = False) -> List[s
     if cached:
         try:
             with open(file_name, 'r') as tc_file:
-                return json.load(tc_file)
+                return ['\n'.join(tc) for tc in json.load(tc_file)]
         except (FileNotFoundError, json.JSONDecodeError):
             pass
 
@@ -66,5 +70,5 @@ def find_test_cases(day: int = None, year: int = None, cached = False) -> List[s
     page = BeautifulSoup(inp, 'html.parser')
     possible_test_cases = [elem.get_text().strip() for elem in page.find_all('pre')]
     with open(file_name, 'w') as tc_file:
-        json.dump(possible_test_cases, tc_file)
+        json.dump([tc.splitlines() for tc in possible_test_cases], tc_file, indent=2)
     return possible_test_cases

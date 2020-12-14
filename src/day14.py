@@ -40,8 +40,6 @@ def run(r: Sequence[str]):
             val = int(cmd.group(2))
             for a in get_addrs(mask, addr):
                 mem[a] = val
-    if len(mem) < 100:
-        print(mem)
     print(sum([v for k, v in mem.items()]))
 
 
@@ -62,7 +60,8 @@ if __name__ == '__main__':
     test_cases = input.find_test_cases(day, year, cached=True)
     for index, tc in enumerate(test_cases):
         tc_list = tc.split(split_seq)
-        print('Test case {}: {}'.format(index, str(tc_list)[:80]))
+        tc_str = str(tc_list)
+        print('Test case {}: {}{}'.format(index, tc_str[:80], '...' if len(tc_str) > 80 else ''))
         try:
             run(tc_list)
         except Exception as ex:

@@ -1,5 +1,3 @@
-from typing import List
-
 import os
 from urllib.request import urlopen, Request
 from datetime import date
@@ -25,6 +23,7 @@ def wait_for_input(day: int = None, year: int = None):
             print('Waiting until {}-12-{}...'.format(year, day))
         num_waits += 1
 
+
 def input_text(day: int = None, year: int = None) -> str:
     today = date.today()
     if day is None:
@@ -47,7 +46,7 @@ def input_text(day: int = None, year: int = None) -> str:
         return inp
 
 
-def find_test_cases(day: int = None, year: int = None, cached = False) -> List[str]:
+def find_test_cases(day: int = None, year: int = None, cached = False) -> list[str]:
     today = date.today()
     if day is None:
         day = today.day

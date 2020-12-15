@@ -8,7 +8,6 @@ def run(r: Sequence[str]):
     n = [int(k) for k in r]
 
     li = {v: k for k, v in enumerate(n[:-1])}
-    print(li)
 
     last = n[-1]
     for i in range(len(n), 30000000):
@@ -18,6 +17,8 @@ def run(r: Sequence[str]):
             newlast = 0
         li[last] = i - 1
         last = newlast
+        if i == 2019:
+            print(last)
     print(last)
 
 

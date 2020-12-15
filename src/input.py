@@ -1,4 +1,5 @@
 import os
+from typing import List
 from urllib.request import urlopen, Request
 from datetime import date
 from time import sleep
@@ -46,7 +47,7 @@ def input_text(day: int = None, year: int = None) -> str:
         return inp
 
 
-def find_test_cases(day: int = None, year: int = None, cached = False) -> list[str]:
+def find_test_cases(day: int = None, year: int = None, cached = False) -> List[str]:
     today = date.today()
     if day is None:
         day = today.day

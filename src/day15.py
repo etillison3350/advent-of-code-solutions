@@ -5,15 +5,27 @@ from re import *
 
 
 def run(r: Sequence[str]):
-    print(r)
-    print(len(r))
+    n = [int(k) for k in r]
+
+    li = {v: k for k, v in enumerate(n[:-1])}
+    print(li)
+
+    last = n[-1]
+    for i in range(len(n), 30000000):
+        if last in li:
+            newlast = i - li[last] - 1
+        else:
+            newlast = 0
+        li[last] = i - 1
+        last = newlast
+    print(last)
 
 
 if __name__ == '__main__':
     day, year = 15, 2020
     input.wait_for_input(day, year)
 
-    split_seq = '\n'
+    split_seq = ','
 
     inp = input.input_text(day, year)
     input_lines = inp.split(split_seq)

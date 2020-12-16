@@ -4,16 +4,80 @@ import input
 from re import *
 
 
+def assign(l: Sequence[set]):
+    if len(l) == 1:
+        if len(l[0]) == 1:
+            return {0: l[0].pop()}
+        return None
+    for p in l[-1]:
+        a = assign([s - {p} for s in l[:-1]])
+        if a:
+            a[len(l) - 1] = p
+            return a
+    return None
+
+
 def run(r: Sequence[str]):
-    print(r)
-    print(len(r))
+    fields = [search('([\\w\\s]+): (\\d+)-(\\d+) or (\\d+)-(\\d+)', fld) for fld in r[0].splitlines()]
+    fields = {s.group(1): (int(s.group(2)), int(s.group(3)), int(s.group(4)), int(s.group(5))) for s in fields}
+    yt = [int(k) for k in r[1].splitlines()[1].split(',')]
+    ots = [[int(k) for k in row.split(',')] for row in r[2].splitlines()[1:]]
+
+    vts = []
+
+    ans = 0
+    for o in ots:
+        for n in o:
+            for l1, u1, l2, u2 in fields.values():
+                if n in range(l1, u1 + 1) or n in range(l2, u2 + 1):
+                    break
+            else:
+                break
+        else:
+            vts.append(o)
+    print(ans)
+
+    pos = [set(fields.keys()) for _ in range(len(fields))]
+    for vt in vts:
+        for i, v in enumerate(vt):
+            pos_flds = pos[i]
+            impos = set()
+            for fn in pos_flds:
+                l1, u1, l2, u2 = fields[fn]
+                if v not in range(l1, u1 + 1) and v not in range(l2, u2 + 1):
+                    impos.add(fn)
+            pos[i] = pos_flds.difference(impos)
+    print(pos)
+
+    a = assign(pos)
+    print(a)
+
+    ans = 1
+    for i, k in a.items():
+        print(k + ': ' + str(yt[i]))
+        if k[0:9] == 'departure':
+            ans *= yt[i]
+    print(ans)
+
+    # ans = 1
+    #
+    # possible_assignments = product(*pos)
+    # for a in possible_assignments:
+    #     if set(a) == set(fields.keys()):
+    #         print(a)
+    #         for i, k in enumerate(a):
+    #             print(k + ': ' + str(yt[i]))
+    #             if k[0:9] == 'departure':
+    #                 ans *= yt[i]
+    #         print(ans)
+    #         break
 
 
 if __name__ == '__main__':
     day, year = 16, 2020
     input.wait_for_input(day, year)
 
-    split_seq = '\n'
+    split_seq = '\n\n'
 
     inp = input.input_text(day, year)
     input_lines = inp.split(split_seq)

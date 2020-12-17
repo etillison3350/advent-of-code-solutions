@@ -1,14 +1,7 @@
 from typing import Sequence
 
-from itertools import product
-
 import input
-from re import *
-
-
-def adj(co):
-    d = len(co)
-    return {tuple(a[i] + co[i] for i in range(d)) for a in product((-1, 0, 1), repeat=d) if a != ((0,) * d)}
+from util import adj
 
 
 def run(r: Sequence[str]):
@@ -19,23 +12,23 @@ def run(r: Sequence[str]):
                 if cell == '#':
                     active.add((x, y) + (0,) * (dim - 2))
 
-        for iter in range(6):
+        for _ in range(6):
             checked = active.copy()
             activate = set()
-            deac = set()
+            deactivate = set()
             for cell in active:
-                a = adj(cell)
-                na = len(active.intersection(a))
-                if na != 2 and na != 3:
-                    deac.add(cell)
-                for ad in a:
-                    if ad in checked:
+                adj_cells = adj(cell)
+                num_adj = len(active.intersection(adj_cells))
+                if num_adj != 2 and num_adj != 3:
+                    deactivate.add(cell)
+                for adj_cell in adj_cells:
+                    if adj_cell in checked:
                         continue
-                    a2 = adj(ad)
-                    na2 = len(active.intersection(a2))
-                    if na2 == 3:
-                        activate.add(ad)
-            active.difference_update(deac)
+                    adj_cells_2 = adj(adj_cell)
+                    num_adj = len(active.intersection(adj_cells_2))
+                    if num_adj == 3:
+                        activate.add(adj_cell)
+            active.difference_update(deactivate)
             active.update(activate)
         print(len(active))
 

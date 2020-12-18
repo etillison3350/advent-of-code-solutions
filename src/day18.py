@@ -2,11 +2,52 @@ from typing import Sequence
 
 import input
 from re import *
+import re
 
 
 def run(r: Sequence[str]):
-    print(r)
-    print(len(r))
+    sum = 0
+    for eq in r:
+        eq = '({})'.format(eq.replace(' ', ''))
+        while True:
+            par = search('\\([^()]+\\)', eq)
+            if par is None:
+                break
+            expr = re.split('(?=[+*])', '+' + par.group()[1:-1])[1:]
+            val = 0
+            for term in expr:
+                op = term[0]
+                n = int(term[1:])
+                if op == '+':
+                    val += n
+                else:
+                    val *= n
+            eq = eq[:par.start()] + str(val) + eq[par.end():]
+        sum += int(eq)
+    print(sum)
+
+    sum = 0
+    for eq in r:
+        eq = '({})'.format(eq.replace(' ', ''))
+        while True:
+            par = search('\\([^()]+\\)', eq)
+            if par is None:
+                break
+            expr = par.group()[1:-1]
+            while True:
+                add = search('(\\d+)\\+(\\d+)', expr)
+                if add is None:
+                    break
+                add1, add2 = int(add.group(1)), int(add.group(2))
+                expr = expr[:add.start()] + str(add1 + add2) + expr[add.end():]
+            expr = re.split('(?=\\*)', '*' + expr)[1:]
+            val = 1
+            for term in expr:
+                n = int(term[1:])
+                val *= n
+            eq = eq[:par.start()] + str(val) + eq[par.end():]
+        sum += int(eq)
+    print(sum)
 
 
 if __name__ == '__main__':

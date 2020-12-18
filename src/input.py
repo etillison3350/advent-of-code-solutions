@@ -47,7 +47,7 @@ def input_text(day: int = None, year: int = None) -> str:
         return inp
 
 
-def find_test_cases(day: int = None, year: int = None, cached = False) -> List[str]:
+def find_test_cases(day: int = None, year: int = None, cached=False) -> List[str]:
     today = date.today()
     if day is None:
         day = today.day
@@ -58,6 +58,7 @@ def find_test_cases(day: int = None, year: int = None, cached = False) -> List[s
     if cached:
         try:
             with open(file_name, 'r') as tc_file:
+                print(os.path.abspath(file_name))
                 return ['\n'.join(tc) for tc in json.load(tc_file)]
         except (FileNotFoundError, json.JSONDecodeError):
             pass
@@ -69,6 +70,7 @@ def find_test_cases(day: int = None, year: int = None, cached = False) -> List[s
         inp = conn.read().decode('utf-8')
     page = BeautifulSoup(inp, 'html.parser')
     possible_test_cases = [elem.get_text().strip() for elem in page.find_all('pre')]
+
     with open(file_name, 'w') as tc_file:
         json.dump([tc.splitlines() for tc in possible_test_cases], tc_file, indent=2)
     return possible_test_cases

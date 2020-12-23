@@ -1,74 +1,92 @@
+from __future__ import annotations
 from typing import Sequence
 
 import input
-from re import *
 
-class llnode():
-    def __init__(self, data, p=None, n=None):
+
+class LinkedListNode:
+    data: int
+    next: LinkedListNode
+
+    def __init__(self, data: int, next_node: LinkedListNode = None):
         self.data = data
-        self.p = p
-        self.n = n
+        self.next = next_node
 
-    def set_next(self, n):
-        self.n = n
-        n.p = self
-
-    def set_prev(self, p):
-        self.p = p
-        p.n = self
+    def set_next(self, next_node):
+        self.next = next_node
 
 
-def p(curr):
-    a = [curr.data]
-    cn = curr.n
-    while cn != curr:
-        a.append(cn.data)
-        cn = cn.n
-    return a
+def crab_game(cups: Sequence[int], num_iterations: int) -> LinkedListNode:
+    max_cup_value = max(cups)
+
+    # Store the cups as a circularly linked list
+    head = LinkedListNode(cups[0])
+    curr_node = head
+    for cup in cups[1:]:
+        new_node = LinkedListNode(cup)
+        curr_node.set_next(new_node)
+        curr_node = new_node
+    curr_node.set_next(head)
+
+    # Instead of applying updates to the linked list immediately (since this requires an O(n) search), store the updates
+    # that are going to be made, and apply the updates only when they would affect the output
+    updates = {}
+
+    curr_node = head
+    for _ in range(num_iterations):
+        # Apply updates to the current node and the three subsequent nodes
+        update_node = curr_node
+        for _ in range(4):
+            if update_node.data in updates:
+                updates[update_node.data].next.next.set_next(update_node.next)
+                update_node.set_next(updates[update_node.data])
+                del updates[update_node.data]
+            update_node = update_node.next
+
+        # Remove the three nodes following the current one
+        curr_cup = curr_node.data
+        remove_node = curr_node.next
+        curr_node.set_next(curr_node.next.next.next.next)
+
+        # Compute the target value; this is the greatest valued cup less than the value of the current cup (or just the
+        # greatest value, if no such cup exists), excluding the cups just removed
+        target_value = (curr_cup - 2) % max_cup_value + 1
+        while target_value in [remove_node.data, remove_node.next.data, remove_node.next.next.data]:
+            target_value = (target_value - 2) % max_cup_value + 1
+        updates[target_value] = remove_node
+
+        curr_node = curr_node.next
+
+    # Apply all updates that haven't been applied yet. Since we're really only concerned about the few values after 1,
+    # we could be a little bit more efficient here, but this isn't too expensive an operation
+    while len(updates):
+        if curr_node.data in updates:
+            updates[curr_node.data].next.next.set_next(curr_node.next)
+            curr_node.set_next(updates[curr_node.data])
+            del updates[curr_node.data]
+        curr_node = curr_node.next
+
+    # Find the node with data 1 and return it
+    while curr_node.data != 1:
+        curr_node = curr_node.next
+    return curr_node
 
 
 def run(r: Sequence[str]):
+    # Part 1
     cups = [int(k) for k in r[0]]
-    max_cup = max(cups)
+    cup_list = []
+    start_node = crab_game(cups, 100)
+    curr_node = start_node.next
+    while curr_node != start_node:
+        cup_list.append(curr_node.data)
+        curr_node = curr_node.next
+    print(''.join(str(k) for k in cup_list))
 
-    head = llnode(cups[0])
-    curr = head
-    for c in cups[1:]:
-        new = llnode(c)
-        curr.set_next(new)
-        curr = new
-    curr.set_next(head)
-
-    curr = head
-    for k in range(100):
-        cc = curr.data
-        rem = curr.n
-        curr.set_next(curr.n.n.n.n)
-
-        t = cc
-        cn = curr.p
-        while True:
-            t = (t - 2) % (max_cup) + 1
-            while cn != curr:
-                if cn.data == t:
-                    break
-                cn = cn.p
-            if cn.data == t:
-                break
-            else:
-                cn = cn.p
-        rem.n.n.set_next(cn.n)
-        cn.set_next(rem)
-        curr = curr.n
-
-    while curr.data != 1:
-        curr = curr.n
-    a = []
-    cn = curr.n
-    while cn != curr:
-        a.append(cn.data)
-        cn = cn.n
-    print(''.join(str(k) for k in a))
+    # Part 2
+    cups = cups + list(range(max(cups) + 1, 1000001))
+    curr_node = crab_game(cups, 10000000).next
+    print(curr_node.data * curr_node.next.data)
 
 
 if __name__ == '__main__':

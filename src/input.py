@@ -58,7 +58,6 @@ def find_test_cases(day: int = None, year: int = None, cached=False) -> List[str
     if cached:
         try:
             with open(file_name, 'r') as tc_file:
-                print(os.path.abspath(file_name))
                 return ['\n'.join(tc) for tc in json.load(tc_file)]
         except (FileNotFoundError, json.JSONDecodeError):
             pass

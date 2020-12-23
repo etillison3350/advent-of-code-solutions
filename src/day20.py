@@ -44,45 +44,45 @@ def run(r: Sequence[str]):
         borders[k] = {k: ''.join(q) for k, q in b.items()}
 
     matches = set()
-    adjs = {}
+    adjacent_counts = {}
 
     ans = 1
-    for n, bs in borders.items():
+    for id, border_set in borders.items():
         k = 0
-        for n2, b2 in borders.items():
-            if n == n2:
+        for other_id, other_borders in borders.items():
+            if id == other_id:
                 continue
-            for border1, border2 in product(bs.items(), b2.items()):
+            for border1, border2 in product(border_set.items(), other_borders.items()):
                 dir1, seq1 = border1
                 dir2, seq2 = border2
                 if seq1 == seq2:
-                    matches.add((n, n2, dir1, dir2, True))
+                    matches.add((id, other_id, dir1))
                     k += 1
                     break
                 elif seq1 == seq2[::-1]:
-                    matches.add((n, n2, dir1, dir2, False))
+                    matches.add((id, other_id, dir1))
                     k += 1
                     break
         if k == 2:
-            ans *= n
-        adjs[n] = k
+            ans *= id
+        adjacent_counts[id] = k
     print(ans)
 
-    size = int(sqrt(len(imgs)))
+    img_size = int(sqrt(len(imgs)))
 
-    out = {}
-    top_corner = [n for n, na in adjs.items() if na == 2][0]
+    img_locations = {}
+    top_corner = [n for n, na in adjacent_counts.items() if na == 2][0]
     queue = [(top_corner, 0, 0)]
-    mapped = set()
+    placed_img_ids = set()
 
     while len(queue):
-        curr_id, curr_x, curr_y = queue.pop()
-        if curr_id in mapped:
+        id, x, y = queue.pop()
+        if id in placed_img_ids:
             continue
-        adjacent_info = [(direction, other, other_dir, flipped) for this, other, direction, other_dir, flipped in matches if this == curr_id]
+        adjacent_info = [(direction, other_id) for matched_id, other_id, direction in matches if matched_id == id]
 
-        orientation = [direction for direction, _, _, _ in adjacent_info]
-        if (curr_x, curr_y) == (0, 0):
+        orientation = [direction for direction, _ in adjacent_info]
+        if (x, y) == (0, 0):
             if 't' in orientation:
                 if 'r' in orientation:
                     rotation_steps = 3
@@ -93,19 +93,19 @@ def run(r: Sequence[str]):
                     rotation_steps = 0
                 else:
                     rotation_steps = 1
-            out[(0, 0)] = transform(imgs[curr_id], False, rotation_steps)
-            mapped.add(curr_id)
+            img_locations[(0, 0)] = transform(imgs[id], False, rotation_steps)
+            placed_img_ids.add(id)
         else:
-            if (curr_x - 1, curr_y) in out:
-                img = imgs[curr_id]
-                match_img = out[(curr_x - 1, curr_y)]
+            if (x - 1, y) in img_locations:
+                img = imgs[id]
+                match_img = img_locations[(x - 1, y)]
                 match = [k[-1] for k in match_img]
                 for rot in range(4):
                     for flip in (True, False):
                         t_img = transform(img, flip, rot)
                         if [k[0] for k in t_img] == match:
-                            out[(curr_x, curr_y)] = t_img
-                            mapped.add(curr_id)
+                            img_locations[(x, y)] = t_img
+                            placed_img_ids.add(id)
                             break
                     else:
                         continue
@@ -113,15 +113,15 @@ def run(r: Sequence[str]):
                 else:
                     continue
             else:
-                img = imgs[curr_id]
-                match_img = out[(curr_x, curr_y - 1)]
+                img = imgs[id]
+                match_img = img_locations[(x, y - 1)]
                 match = match_img[-1]
                 for rot in range(4):
                     for flip in (True, False):
                         t_img = transform(img, flip, rot)
                         if t_img[0] == match:
-                            out[(curr_x, curr_y)] = t_img
-                            mapped.add(curr_id)
+                            img_locations[(x, y)] = t_img
+                            placed_img_ids.add(id)
                             break
                     else:
                         continue
@@ -129,21 +129,21 @@ def run(r: Sequence[str]):
                 else:
                     continue
 
-        for _, adj_id, _, _ in adjacent_info:
-            if curr_x + 1 < size:
-                queue.append((adj_id, curr_x + 1, curr_y))
-            if curr_y + 1 < size:
-                queue.append((adj_id, curr_x, curr_y + 1))
+        for _, adj_id in adjacent_info:
+            if x + 1 < img_size:
+                queue.append((adj_id, x + 1, y))
+            if y + 1 < img_size:
+                queue.append((adj_id, x, y + 1))
             queue.sort(key=lambda n: n[1] + n[2])
 
     assembled = []
 
-    for y in range(size):
-        for x in range(size):
-            if (x, y) not in out:
+    for y in range(img_size):
+        for x in range(img_size):
+            if (x, y) not in img_locations:
                 img = [[' '] * 10] * 10
             else:
-                img = out[(x, y)]
+                img = img_locations[(x, y)]
             while len(assembled) < (len(img) - 2) * (y + 1):
                 assembled.append([])
             for i, row in enumerate(img[1:-1]):
@@ -178,6 +178,7 @@ def run(r: Sequence[str]):
             if num_monsters:
                 count = 0
                 for row in asm_img:
+                    print(''.join(row))
                     for cell in row:
                         if cell == '#':
                             count += 1

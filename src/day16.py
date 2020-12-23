@@ -20,13 +20,13 @@ def assign(l: Sequence[set]):
 def run(r: Sequence[str]):
     fields = [search('([\\w\\s]+): (\\d+)-(\\d+) or (\\d+)-(\\d+)', fld) for fld in r[0].splitlines()]
     fields = {s.group(1): (int(s.group(2)), int(s.group(3)), int(s.group(4)), int(s.group(5))) for s in fields}
-    yt = [int(k) for k in r[1].splitlines()[1].split(',')]
-    ots = [[int(k) for k in row.split(',')] for row in r[2].splitlines()[1:]]
+    your_ticket = [int(k) for k in r[1].splitlines()[1].split(',')]
+    other_tickets = [[int(k) for k in row.split(',')] for row in r[2].splitlines()[1:]]
 
-    vts = []
+    valid_tickets = []
 
     ans = 0
-    for o in ots:
+    for o in other_tickets:
         for n in o:
             for l1, u1, l2, u2 in fields.values():
                 if n in range(l1, u1 + 1) or n in range(l2, u2 + 1):
@@ -34,29 +34,29 @@ def run(r: Sequence[str]):
             else:
                 break
         else:
-            vts.append(o)
+            valid_tickets.append(o)
     print(ans)
 
     pos = [set(fields.keys()) for _ in range(len(fields))]
-    for vt in vts:
-        for i, v in enumerate(vt):
-            pos_flds = pos[i]
+    for ticket in valid_tickets:
+        for ix, fld_val in enumerate(ticket):
+            pos_flds = pos[ix]
             impos = set()
             for fn in pos_flds:
                 l1, u1, l2, u2 = fields[fn]
-                if v not in range(l1, u1 + 1) and v not in range(l2, u2 + 1):
+                if fld_val not in range(l1, u1 + 1) and fld_val not in range(l2, u2 + 1):
                     impos.add(fn)
-            pos[i] = pos_flds.difference(impos)
+            pos[ix] = pos_flds.difference(impos)
     print(pos)
 
     a = assign(pos)
     print(a)
 
     ans = 1
-    for i, k in a.items():
-        print(k + ': ' + str(yt[i]))
+    for ix, k in a.items():
+        print(k + ': ' + str(your_ticket[ix]))
         if k[0:9] == 'departure':
-            ans *= yt[i]
+            ans *= your_ticket[ix]
     print(ans)
 
     # ans = 1

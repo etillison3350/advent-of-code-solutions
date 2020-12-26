@@ -1,12 +1,26 @@
 from typing import Sequence
 
 import input
-from re import *
 
 
 def run(r: Sequence[str]):
-    print(r)
-    print(len(r))
+    pk1, pk2 = (int(k) for k in r)
+
+    cv = 1
+    sn = 7
+    ln = 0
+    while cv != pk1:
+        ln += 1
+        cv *= sn
+        cv %= 20201227
+    print(ln)
+
+    sn = pk2
+    cv = 1
+    for _ in range(ln):
+        cv *= sn
+        cv %= 20201227
+    print(cv)
 
 
 if __name__ == '__main__':

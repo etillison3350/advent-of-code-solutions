@@ -68,8 +68,11 @@ def find_test_cases(day: Optional[int] = None, year: Optional[int] = None, cache
             pass
 
     req = Request('https://adventofcode.com/{}/day/{}'.format(year, day))
-    with open(os.path.join(os.path.dirname(__file__), 'session.cookie'), 'r') as cookie:
-        req.add_header('cookie', 'session=' + cookie.read())
+    try:
+        with open(os.path.join(os.path.dirname(__file__), 'session.cookie'), 'r') as cookie:
+            req.add_header('cookie', 'session=' + cookie.read())
+    except FileNotFoundError:
+        pass
     with urlopen(req) as conn:
         inp = conn.read().decode('utf-8')
     page = BeautifulSoup(inp, 'html.parser')

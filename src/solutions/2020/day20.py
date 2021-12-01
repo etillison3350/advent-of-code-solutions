@@ -4,7 +4,7 @@ from itertools import product
 
 from math import sqrt
 
-import input
+from helpers import input
 
 
 dir_nums = {'t': 0, 'r': 1, 'b': 2, 'l': 3}

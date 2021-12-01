@@ -1,6 +1,6 @@
 from typing import Sequence
 
-import input
+from helpers import input
 
 
 def run(r: Sequence[str]):

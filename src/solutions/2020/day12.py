@@ -1,7 +1,7 @@
 from typing import Sequence
 import sys
 
-import input
+from helpers import input
 from re import *
 
 left = {'E': 'N', 'S': 'E', 'W': 'S', 'N': 'W'}

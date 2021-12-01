@@ -1,4 +1,4 @@
-from input import input_text
+from helpers.input import input_text
 from re import *
 
 if __name__ == '__main__':

@@ -1,14 +1,15 @@
 import os
-from typing import List
+from typing import List, Optional
 from urllib.request import urlopen, Request
 from datetime import date
 from time import sleep
+from pathlib import Path
 
 import json
 from bs4 import BeautifulSoup
 
 
-def wait_for_input(day: int = None, year: int = None):
+def wait_for_input(day: Optional[int] = None, year: Optional[int] = None) -> None:
     today = date.today()
     if day is None:
         day = today.day
@@ -21,18 +22,20 @@ def wait_for_input(day: int = None, year: int = None):
             break
         sleep(1)
         if num_waits % 60 == 0:
-            print('Waiting until {}-12-{}...'.format(year, day))
+            print('Waiting until {:0>4}-12-{:0>2}...'.format(year, day))
         num_waits += 1
 
 
-def input_text(day: int = None, year: int = None) -> str:
+def input_text(day: Optional[int] = None, year: Optional[int] = None) -> str:
     today = date.today()
     if day is None:
         day = today.day
     if year is None:
         year = today.year
 
-    file_name = 'input-{:0>4}{:0>2}.txt'.format(year, day)
+    file_path = Path(__file__).parent.parent.joinpath('inputs/{0:0>4}/input-{0:0>4}{1:0>2}.txt'.format(year, day))
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_name = file_path.resolve()
     try:
         with open(file_name, 'r') as inp_file:
             return inp_file.read()
@@ -47,14 +50,16 @@ def input_text(day: int = None, year: int = None) -> str:
         return inp
 
 
-def find_test_cases(day: int = None, year: int = None, cached=False) -> List[str]:
+def find_test_cases(day: Optional[int] = None, year: Optional[int] = None, cached=False) -> List[str]:
     today = date.today()
     if day is None:
         day = today.day
     if year is None:
         year = today.year
 
-    file_name = 'testcases-{:0>4}{:0>2}.json'.format(year, day)
+    file_path = Path(__file__).parent.parent.joinpath('inputs/{0:0>4}/testcases-{0:0>4}{1:0>2}.json'.format(year, day))
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_name = file_path.resolve()
     if cached:
         try:
             with open(file_name, 'r') as tc_file:

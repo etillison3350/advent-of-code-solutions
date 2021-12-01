@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Sequence
 
-import input
+from helpers import input
 
 
 class LinkedListNode:

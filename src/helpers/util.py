@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, Sequence, TypeVar
+from typing import Any, Callable, Iterable, Optional, Sequence, TypeVar
 
 from itertools import islice, product, tee
 
@@ -21,3 +21,32 @@ def nwise(iterable: Iterable[Any], n: int = 2):
     for i, iterator in enumerate(iterators):
         next(islice(iterator, i, i), None)
     return zip(*iterators)
+
+
+# Dijkstra's Shunting Yard Algorithm for computing postfix notation from infix notation (useful in expression parsing)
+def shunt_yard(infix: str, op_map: Optional[dict[str, int]] = None) -> list[str]:
+    if op_map is None:
+        op_map = {'+': 1, '-': 1, '*': 2, '/': 2}
+
+    stack = []
+    output = []
+    for ch in infix:
+        if len(ch.strip()) == 0:
+            continue
+
+        if ch == '(':
+            stack.append(ch)
+        elif ch == ')':
+            while stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()
+        elif ch in op_map:
+            while len(stack) > 0 and stack[-1] != '(' and (stack[-1] not in op_map or op_map[stack[-1]] > op_map[ch]):
+                output.append(stack.pop())
+            stack.append(ch)
+        else:
+            output.append(ch)
+    while len(stack) > 0:
+        output.append(stack.pop())
+
+    return output

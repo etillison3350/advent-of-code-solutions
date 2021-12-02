@@ -1,5 +1,3 @@
-from typing import Any, Callable, Generator, Sequence
-
 from helpers.executor import Executor
 
 from helpers.util import *
@@ -7,6 +5,8 @@ import itertools
 from itertools import *
 import re
 from re import *
+
+from typing import Any, Callable, Generator, Sequence
 
 day, year = None, None  # TODO: Update day and year for current day
 split_seq = '\n'

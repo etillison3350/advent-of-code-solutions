@@ -3,6 +3,7 @@ from typing import Any, Callable, Iterable, Optional, Sequence, TypeVar
 from itertools import islice, product, tee
 
 
+S = TypeVar('S')
 T = TypeVar('T')
 
 
@@ -11,8 +12,12 @@ def adj(co):
     return {tuple(a[i] + co[i] for i in range(d)) for a in product((-1, 0, 1), repeat=d) if a != ((0,) * d)}
 
 
-def as_type(seq: Sequence[str], type_conv: Callable[[str], T]) -> list[T]:
+def as_type(seq: Iterable[S], type_conv: Callable[[S], T]) -> list[T]:
     return [type_conv(x) for x in seq]
+
+
+def as_grid(seq: Iterable[Iterable[S]], type_conv: Optional[Callable[[S], T]] = None) -> list[list[T]]:
+    return [[type_conv(c) if type_conv else c for c in row] for row in seq]
 
 
 # https://stackoverflow.com/a/21303303

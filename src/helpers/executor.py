@@ -64,9 +64,9 @@ class Executor:
             while true_output_pipe.poll():
                 true_answers.append(true_output_pipe.recv())
 
-            if len(true_answers) > 0:
+            if len(true_answers) > 0 and any(ans is not None for ans in true_answers):
                 print('---- True Output ----',
-                      *['Ans. #{}:\n{}'.format(part + 1, a) for part, a in enumerate(true_answers)],
+                      *['Ans. #{}:\n{}'.format(part + 1, a) for part, a in enumerate(true_answers) if a is not None],
                       sep='\n', end='\n\n', file=tc_output)
 
             print(tc_output.getvalue())

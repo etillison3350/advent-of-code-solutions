@@ -10,7 +10,7 @@ import numpy as np
 
 from typing import Any, Callable, Generator, Sequence
 
-day, year = 4, 2021  # TODO: Update day and year for current day
+day, year = 4, 2021
 split_seq = '\n\n'
 
 

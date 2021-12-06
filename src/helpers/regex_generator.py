@@ -1,8 +1,11 @@
 from typing import Callable, Generator, Iterable, NamedTuple, Optional, Sequence, TypeVar, Generic, Any
 from enum import Enum
 
+import os
+
 from collections import defaultdict
 import math
+import re
 
 
 T = TypeVar('T')
@@ -38,7 +41,7 @@ class _IReTerm(NamedTuple):
     syms: set
 
 
-_IRegex = list[_IReTerm]
+_IRegex = Sequence[_IReTerm]
 
 
 class LevOp(Enum):
@@ -72,13 +75,11 @@ def _get_default_costs() -> dict[LevOp, int]:
 
 
 def _get_default_char_classes() -> list[set]:
-    """Get the default set of character classes that the regex generator should attempt to find: [a-z], [A-Z], \\d,
-    and \\s """
+    """Get the default set of character classes that the regex generator should attempt to find: [a-z], [A-Z], \\d"""
     return [
         set(chr(x) for x in range(ord('A'), ord('Z') + 1)),
         set(chr(x) for x in range(ord('a'), ord('z') + 1)),
-        set(chr(x) for x in range(ord('0'), ord('9') + 1)),
-        set(x for x in ' \f\n\r\t')
+        set(chr(x) for x in range(ord('0'), ord('9') + 1))
     ]
 
 
@@ -104,9 +105,10 @@ def _generate_regex(strings: Iterable[Sequence],
     if classes is None:
         classes = _get_default_char_classes()
 
-    regex_list: list[_IRegex] = [[_IReTerm(_IReQuant(1, 1), {token}) for token in next(iter(strings))]]
+    string_iter = iter(strings)
+    regex_list: list[_IRegex] = [[_IReTerm(_IReQuant(1, 1), {token}) for token in next(string_iter)]]
 
-    for input_string in strings[1:]:
+    for input_string in string_iter:
         try:
             new_regex_list = []
             min_cost = math.inf
@@ -226,31 +228,31 @@ def _create_new_regex(table: list[list[tuple[int, list[LevOp]]]],
     new_regex_list: list[_IRegex] = []
     for op in ops:
         if op == LevOp.NEW:
-            new_term = [_IReTerm(_IReQuant(0, 1), {input_string[x - 1]})]
+            new_term = _IReTerm(_IReQuant(0, 1), {input_string[x - 1]})
             for rx in _create_new_regex(table, regex, input_string, (x - 1, y), return_multiple, memo):
-                new_regex_list.append(rx + new_term)
+                new_regex_list.append([*rx, new_term])
         elif op == LevOp.MODIFY or op == LevOp.MODIFY_ADD_CLASS:
             new_syms = {input_string[x - 1]}
             new_syms.update(regex[y - 1].syms)
-            new_term = [_IReTerm(regex[y - 1].quant, new_syms)]
+            new_term = _IReTerm(regex[y - 1].quant, new_syms)
             for rx in _create_new_regex(table, regex, input_string, (x - 1, y - 1), return_multiple, memo):
-                new_regex_list.append(rx + new_term)
+                new_regex_list.append([*rx, new_term])
         elif op == LevOp.DELETE:
-            new_term = [_IReTerm(_IReQuant(0, 1), regex[y - 1].syms)]
+            new_term = _IReTerm(_IReQuant(0, 1), regex[y - 1].syms)
             for rx in _create_new_regex(table, regex, input_string, (x, y - 1), return_multiple, memo):
-                new_regex_list.append(rx + new_term)
+                new_regex_list.append([*rx, new_term])
         elif op == LevOp.SWAP:
             new_syms = regex[y - 1].syms.union(regex[y - 2].syms)
             new_quant = sorted((regex[y - 1].quant, regex[y - 2].quant))
-            new_terms = [_IReTerm(new_quant[0], new_syms), _IReTerm(new_quant[0], new_syms)]
+            new_terms = _IReTerm(new_quant[0], new_syms), _IReTerm(new_quant[0], new_syms)
             for rx in _create_new_regex(table, regex, input_string, (x - 2, y - 2), return_multiple, memo):
-                new_regex_list.append(rx + new_terms)
+                new_regex_list.append([*rx, *new_terms])
         elif op == LevOp.MATCH:
             for rx in _create_new_regex(table, regex, input_string, (x - 1, y - 1), return_multiple, memo):
-                new_regex_list.append(rx + [regex[y - 1]])
+                new_regex_list.append([*rx, regex[y - 1]])
         elif op == LevOp.IGNORE_OPTIONAL:
             for rx in _create_new_regex(table, regex, input_string, (x, y - 1), return_multiple, memo):
-                new_regex_list.append(rx + [regex[y - 1]])
+                new_regex_list.append([*rx, regex[y - 1]])
 
         if not return_multiple:
             break
@@ -293,7 +295,7 @@ def _coalesce_patterns(patterns: dict[tuple, list[_IRegex]]) -> list[_IRegex]:
 
 
 def _transform_multiple(regex: _IRegex,
-                        transformations: Iterable[Callable[[_IRegex], _IRegex]],
+                        *transformations: Callable[[_IRegex], _IRegex],
                         maxiter: Optional[int] = 10):
     original_length = len(regex)
 
@@ -311,13 +313,22 @@ def _transform_multiple(regex: _IRegex,
     return regex
 
 
-def _convert_class_to_index(input_list: Sequence[Sequence[T]],
-                            classes: Optional[Sequence[set[T]]]) -> list[list[T | int]]:
+def _convert_class_to_index(input_list: Iterable[Sequence[T]],
+                            classes: Optional[Sequence[set[T]]] = None) -> list[tuple[T | int]]:
     if classes is None:
         classes = _get_default_char_classes()
 
-    return [[next((ix for ix, cls in enumerate(classes) if ch in cls), ch) for ch in input_string]
-            for input_string in input_list]
+    new_inputs = []
+    for input_string in input_list:
+        new_string = []
+        for ch in input_string:
+            cls_mask = 0
+            for ix, cls in enumerate(classes):
+                if ch in cls:
+                    cls_mask |= (1 << ix)
+            new_string.append(cls_mask or ch)
+        new_inputs.append(tuple(new_string))
+    return new_inputs
 
 
 def _transform_index_to_class(regex: _IRegex, classes: Optional[Sequence[set[T]]] = None) -> _IRegex:
@@ -328,12 +339,16 @@ def _transform_index_to_class(regex: _IRegex, classes: Optional[Sequence[set[T]]
     for term in regex:
         syms = set()
         for cls in term.syms:
-            if type(cls) == int:
-                syms.update(classes[cls])
+            if type(cls) == int and cls > 0:
+                syms.update(classes[int.bit_length(cls) - 1])
             else:
                 syms.add(cls)
         new_regex.append(_IReTerm(term.quant, syms))
     return new_regex
+
+
+def _convert_split(input_list: Iterable[str], split: str = '(?<=\\W)|(?=\\W)') -> list[list[str]]:
+    return [re.split(split, input_string) for input_string in input_list]
 
 
 def _transform_generalize_to_classes(regex: _IRegex,
@@ -409,62 +424,92 @@ def _get_named_character_classes() -> dict[str, set[str]]:
     }
 
 
-def _iregex_as_string(regex: _IRegex, esc=True):
+def _iregex_as_string(regex: _IRegex, quant_limit: int = 0, esc=True, capture: str = 'none'):
     esc_chars = None if esc else []
     out = ''
+    capture_group = ''
     for term in regex:
-        if len(term.syms) == 1:
-            token = next(iter(term.syms))
-            if len(token) > 1 and term.quant != (1, 1):
+        syms = {str(token) for token in term.syms}
+        quant = term.quant
+        if '' in syms:  # (<empty>|str1|...)+ is equivalent to (str1|...)*
+            syms.remove('')
+            quant = _IReQuant(0, quant.hi)
+        if len(syms) == 0:  # If there are no possible options, just ignore this term
+            continue
+
+        # Alternation
+        if len(syms) == 1:  # One possible token
+            token = next(iter(syms))
+            if len(token) > 1 and quant != (1, 1):  # If token is multiple chars, wrap in non-capturing group
                 group_str = '(?:' + _escape(token, esc_chars) + ')'
-            else:
+            else:  # Otherwise, it can be included as-is
                 group_str = _escape(token, esc_chars)
-        elif all(len(token) == 1 for token in term.syms):
+        elif all(len(token) == 1 for token in syms):  # Many possible terms, all single characters (use [] notation)
             group_str = ''
-            syms = term.syms
             num_names = 0
+            # Apply named character classes: \d, \s, etc.
             for name, char_cls in _get_named_character_classes().items():
                 if syms.issuperset(char_cls):
                     group_str += name
                     syms = syms.difference(char_cls)
                     num_names += 1
-            if len(syms) == 0:
-                if num_names != 1:
+            if len(syms) == 0:  # If all of the tokens can be represented by named classes, we're done
+                if num_names != 1:  # We don't even need brackets if it's just one class
                     group_str = '[' + group_str + ']'
-            else:
+            else:  # Otherwise, list the (additional) characters in brackets
                 group_str = '[' + group_str
                 token_iter = iter(sorted(syms))
-                group = [ord(next(token_iter))] * 2
-                for token in token_iter:
-                    if ord(token) == group[1] + 1:
-                        group[1] += 1
+                range_bounds = [ord(next(token_iter))] * 2
+                for token in token_iter:  # Find consecutive characters, and represent them as ranges (e.g. [a-g])
+                    if ord(token) == range_bounds[1] + 1:
+                        range_bounds[1] += 1
                     else:
-                        group_str += _group_as_range(*group)
-                        group = [ord(token)] * 2
-                group_str += _group_as_range(*group) + ']'
-        else:
-            group_str = '(?:' + '|'.join(_escape(token, esc_chars) for token in sorted(term.syms)) + ')'
+                        group_str += _escape_range(*range_bounds)
+                        range_bounds = [ord(token)] * 2
+                group_str += _escape_range(*range_bounds) + ']'
+        else:  # Many possible token, not all single characters: use alternation (?:token_1|token_2|...)
+            group_str = '(?:' + '|'.join(_escape(token, esc_chars) for token in sorted(syms)) + ')'
 
-        if term.quant == (0, 1):
+        # Quantifiers
+        if quant == (0, 1):
             group_str += '?'
-        elif term.quant == (1, 1):
+        elif quant == (1, 1):
             pass
-        elif term.quant[1] > 5 and term.quant[0] == 0:
+        elif quant.hi > quant_limit and quant.lo == 0:
             group_str += '*'
-        elif term.quant[1] > 5 and term.quant[0] < term.quant[1] / 2:
+        elif quant.hi > quant_limit and quant.hi - quant.lo > quant_limit:
             group_str += '+'
-        elif term.quant[0] == term.quant[1]:
-            if len(group_str) == 1 and term.quant[0] < 6:
-                group_str *= term.quant[0]
+        elif quant.lo == quant.hi:
+            if len(group_str) == 1 and quant.lo < 6:
+                group_str *= quant.lo
             else:
-                group_str += '{{{}}}'.format(term.quant[0])
+                group_str += '{{{}}}'.format(quant.lo)
         else:
-            group_str += '{{{},{}}}'.format(*term.quant)
-        out += group_str
+            group_str += '{{{},{}}}'.format(*quant)
+
+        if capture == 'consecutive':
+            if quant.lo == quant.hi and len(term.syms) == 1:
+                if len(capture_group) > 0:
+                    out += '(' + capture_group + ')'
+                capture_group = ''
+                out += group_str
+            else:
+                capture_group += group_str
+        elif capture == 'each' and (quant.lo != quant.hi or len(term.syms) != 1):
+            out += '(' + group_str + ')'
+        else:
+            out += group_str
+
+    if len(capture_group) > 0:
+        if len(out) == 0:
+            out = capture_group
+        else:
+            out += '(' + capture_group + ')'
+
     return out
 
 
-def _group_as_range(lower_ord: int, upper_ord: int) -> str:
+def _escape_range(lower_ord: int, upper_ord: int) -> str:
     if upper_ord - lower_ord > 2:
         return _escape(lower_ord) + '-' + _escape(upper_ord)
     else:
@@ -477,13 +522,10 @@ def _escape(string: str | int, chars: Optional[Sequence[str]] = None) -> str:
     elif len(string) != 1:
         return ''.join(_escape(c, chars) for c in string)
 
-    if string in ('.*+?^${}()|[-]' if chars is None else chars):
+    if string in ('.*+?^${}()|[-]\\' if chars is None else chars):
         return '\\' + string
     else:
         return string
-
-
-import re, os
 
 
 if __name__ == '__main__':
@@ -499,26 +541,70 @@ if __name__ == '__main__':
                     for part_inp in parts:
                         inp = part_inp.splitlines()[1:]
 
-                        if len(inp) < 2:
+                        if len(inp) < 3:
                             continue
                         print()
                         print(file, inp[0])
 
-                        classes = _get_default_char_classes()
-                        inp_cls = _convert_class_to_index(inp, classes)
-
-                        # *_, re_list = _generate_regex(inp, tree=False)
-                        # for regex in re_list:
-                        #     print(_apply_quantifiers(regex))
-                        #     print(_iregex_as_string(regex))
-
-                        *_, re_list = _generate_regex(inp_cls, classes=[set()])
-                        for rx in re_list:
-                            regex = _transform_index_to_class(rx, classes)
-
-                            print(_iregex_as_string(regex))
-                            regex_str = _iregex_as_string(_transform_merge_quantifiers(regex))
+                        *_, re_list = _generate_regex(_convert_class_to_index(str) for str in _convert_split(inp))
+                        for regex in re_list:
+                            print(regex)
+                            regex_str = _iregex_as_string(_transform_merge_quantifiers(regex),
+                                                          capture='consecutive',
+                                                          quant_limit=0)
                             print(regex_str)
-                            if len(regex_str) < 255 and not all(re.fullmatch(regex_str, s) is not None for s in inp[:16]):
-                                print([s for s in inp[:16] if re.fullmatch(regex_str, s) is None])
-                                assert False
+
+                            # if len(regex_str) < 511:
+                            #     for s in inp[:8]:
+                            #         match = re.fullmatch(regex_str, s)
+                            #
+                            #         if match is None:
+                            #             print(s)
+                            #             assert match is not None
+                            #         elif len(match.groups()) > 0:
+                            #             print(s)
+                            #             print(match.groups())
+
+                        # *_, re_list = _generate_regex(inp)
+                        # for regex in re_list:
+                        #     regex_str = _iregex_as_string(_transform_multiple(regex, _transform_generalize_to_classes, _transform_merge_quantifiers), capture='consecutive',
+                        #                                   quant_limit=0)
+                        #     print(regex_str)
+                        #
+                        #     if len(regex_str) < 511:
+                        #         for s in inp[:8]:
+                        #             match = re.fullmatch(regex_str, s)
+                        #
+                        #             if match is None:
+                        #                 print(s)
+                        #                 assert match is not None
+                        #             elif len(match.groups()) > 0:
+                        #                 print(s)
+                        #                 print(match.groups())
+                        #
+                        # classes = _get_default_char_classes()
+                        # inp_cls = _convert_class_to_index(inp, classes)
+                        #
+                        # # *_, re_list = _generate_regex(inp, tree=False)
+                        # # for regex in re_list:
+                        # #     print(_apply_quantifiers(regex))
+                        # #     print(_iregex_as_string(regex))
+                        #
+                        # *_, re_list = _generate_regex(inp_cls, classes=[set()])
+                        # for rx in re_list:
+                        #     regex = _transform_index_to_class(rx, classes)
+                        #
+                        #     print(_iregex_as_string(regex))
+                        #     regex_str = _iregex_as_string(_transform_merge_quantifiers(regex), capture='consecutive', quant_limit=0)
+                        #     print(regex_str)
+                        #
+                        #     if len(regex_str) < 511:
+                        #         for s in inp[:8]:
+                        #             match = re.fullmatch(regex_str, s)
+                        #
+                        #             if match is None:
+                        #                 print(s)
+                        #                 assert match is not None
+                        #             elif len(match.groups()) > 0:
+                        #                 print(s)
+                        #                 print(match.groups())

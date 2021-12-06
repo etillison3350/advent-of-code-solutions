@@ -16,12 +16,13 @@ split_seq = ','
 
 class Solution(Executor):
     def solve(self, r: Sequence[str], print: Callable[..., None]) -> Generator[Any, None, None]:
-        yield self._solve(r, 80)
-        yield self._solve(r, 256)
+        initial_timers = as_type(r, int)
+        yield self._solve(initial_timers, 80)
+        yield self._solve(initial_timers, 256)
 
-    def _solve(self, r: Sequence[str], n) -> Any:
+    def _solve(self, initial_timers: Sequence[int], n) -> Any:
         timers = np.zeros(10)
-        unique, counts = np.unique(as_type(r, int), return_counts=True)
+        unique, counts = np.unique(initial_timers, return_counts=True)
         timers[unique] = counts
 
         for _ in range(n):

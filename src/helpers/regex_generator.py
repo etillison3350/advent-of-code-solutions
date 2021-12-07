@@ -532,7 +532,7 @@ if __name__ == '__main__':
     dir = '..\\inputs'
     for dirpath, dirnames, filenames in os.walk(dir):
         for file in filenames:
-            if file.startswith('input'):
+            if file.startswith('input-202007'):
                 with open(os.path.join(dirpath, file), 'r') as inp_file:
                     whole_inp = inp_file.read()
                     parts = whole_inp.split('\n\n')
@@ -546,13 +546,13 @@ if __name__ == '__main__':
                         print()
                         print(file, inp[0])
 
-                        *_, re_list = _generate_regex(_convert_class_to_index(str) for str in _convert_split(inp))
-                        for regex in re_list:
-                            print(regex)
-                            regex_str = _iregex_as_string(_transform_merge_quantifiers(regex),
-                                                          capture='consecutive',
-                                                          quant_limit=0)
-                            print(regex_str)
+                        # *_, re_list = _generate_regex(_convert_class_to_index(str) for str in _convert_split(inp))
+                        # for regex in re_list:
+                        #     print(regex)
+                        #     regex_str = _iregex_as_string(_transform_merge_quantifiers(regex),
+                        #                                   capture='consecutive',
+                        #                                   quant_limit=0)
+                        #     print(regex_str)
 
                             # if len(regex_str) < 511:
                             #     for s in inp[:8]:
@@ -565,22 +565,22 @@ if __name__ == '__main__':
                             #             print(s)
                             #             print(match.groups())
 
-                        # *_, re_list = _generate_regex(inp)
-                        # for regex in re_list:
-                        #     regex_str = _iregex_as_string(_transform_multiple(regex, _transform_generalize_to_classes, _transform_merge_quantifiers), capture='consecutive',
-                        #                                   quant_limit=0)
-                        #     print(regex_str)
-                        #
-                        #     if len(regex_str) < 511:
-                        #         for s in inp[:8]:
-                        #             match = re.fullmatch(regex_str, s)
-                        #
-                        #             if match is None:
-                        #                 print(s)
-                        #                 assert match is not None
-                        #             elif len(match.groups()) > 0:
-                        #                 print(s)
-                        #                 print(match.groups())
+                        *_, re_list = _generate_regex(inp)
+                        for regex in re_list:
+                            regex_str = _iregex_as_string(_transform_multiple(regex, _transform_generalize_to_classes, _transform_merge_quantifiers), capture='consecutive',
+                                                          quant_limit=0)
+                            print(regex_str)
+
+                            if len(regex_str) < 511:
+                                for s in inp[:8]:
+                                    match = re.fullmatch(regex_str, s)
+
+                                    if match is None:
+                                        print(s)
+                                        assert match is not None
+                                    elif len(match.groups()) > 0:
+                                        print(s)
+                                        print(match.groups())
                         #
                         # classes = _get_default_char_classes()
                         # inp_cls = _convert_class_to_index(inp, classes)

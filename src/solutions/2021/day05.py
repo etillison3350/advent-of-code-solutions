@@ -1,11 +1,7 @@
 from helpers.executor import Executor
 
 from helpers.util import *
-import itertools
-from itertools import *
 import re
-from re import *
-
 import numpy as np
 
 from typing import Any, Callable, Generator, Sequence

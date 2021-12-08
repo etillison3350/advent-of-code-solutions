@@ -19,71 +19,68 @@ class Solution(Executor):
         yield self._solve_part2(r, print)
 
     def _solve_part1(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        s = [re.split(' \| ', sr) for sr in r]
-        n = 0
-        for _, ov in s:
-            for part in ov.split():
+        lines = [line.split(' | ') for line in r]
+        ans = 0
+        for _, output_value in lines:
+            for part in output_value.split():
                 if len(part) in (2, 3, 4, 7):
-                    n += 1
-        return n
+                    ans += 1
+        return ans
 
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
+        # Which segments are on for each digit?
+        # Segments are numbered left-to-right:
+        #  0
+        # 1 2
+        #  3
+        # 4 5
+        #  6
         segment_map = [
-            'abcefg', 'cf', 'acdeg', 'acdfg', 'bcdf', 'abdfg', 'abdefg', 'acf', 'abcdefg', 'abcdfg'
+            {0, 1, 2, 4, 5, 6},     # 0
+            {2, 5},                 # 1
+            {0, 2, 3, 4, 6},        # 2
+            {0, 2, 3, 5, 6},        # 3
+            {1, 2, 3, 5},           # 4
+            {0, 1, 3, 5, 6},        # 5
+            {0, 1, 3, 4, 5, 6},     # 6
+            {0, 2, 5},              # 7
+            {0, 1, 2, 3, 4, 5, 6},  # 8
+            {0, 1, 2, 3, 5, 6}      # 9
         ]
-        sm = [set(ord(c) - 97 for c in s) for s in segment_map]
 
-        dm = {
-            2: {1},
-            3: {7},
-            4: {4},
-            5: {2, 3, 5},
-            6: {0, 6, 9},
-            7: {8}
-        }
-        qm = {}
-        for d, st in dm.items():
-            qm[d] = set()
-            for n in st:
-                qm[d].update(sm[n])
+        # Map from number of active segments (word length in input) to digits with that many active segments
+        length_map = [{index for index, s in enumerate(segment_map) if len(s) == n} for n in range(2, 8)]
 
-        do = set(sum(p, start=()) for p in itertools.product(*(itertools.permutations(v) for v in dm.values())))
+        # In a list sorted by word length, these are all possible orders of the digits
+        digit_orderings = set(sum(p, start=()) for p in itertools.product(*(itertools.permutations(v) for v in length_map)))
 
-        s = [re.split(' \| ', sr) for sr in r]
-        n = 0
-        for iv, ov in s:
-            ds = sorted(iv.split(), key=lambda x: len(x))
-            for order in do:
+        lines = [line.split(' | ') for line in r]
+        ans = 0
+        for input_values, output_values in lines:
+            # Sort the words in the input section by length. Also sort the characters in each word
+            input_words = sorted((sorted(word) for word in input_values.split()), key=lambda x: len(x))
+
+            # Find the order of the digits that produces a valid mapping from letter to segment index
+            for order in digit_orderings:
+                # Possible letters corresponding to each of the seven segments
                 possible_segs = [set('abcdefg') for _ in range(7)]
 
-                for sigs, dig in zip(ds, order):
-                    pd = sm[dig]
-                    for ix in pd:
-                        possible_segs[ix].intersection_update(set(sigs))
-                if all(len(x) > 0 for x in possible_segs):
-                    print(possible_segs)
-                    while not all(len(x) == 1 for x in possible_segs):
-                        singles = set()
-                        for x in possible_segs:
-                            if len(x) == 1:
-                                singles.update(x)
-                        for x in possible_segs:
-                            if len(x) > 1:
-                                x.difference_update(singles)
-                    print(possible_segs)
+                # Remove impossible letters from possible_segs by set intersection
+                for word, digit in zip(input_words, order):
+                    for ix in segment_map[digit]:
+                        possible_segs[ix].intersection_update(set(word))
+                # This mapping is valid only if there is at least one possible letter for each segment
+                if all(len(s) > 0 for s in possible_segs):
+                    # The four digit number in the output
                     num = 0
-                    for part in ov.split():
-                        ssd = set()
-
-                        for i, s in enumerate(possible_segs):
-                            if next(iter(s)) in part:
-                                ssd.add(i)
-                        f = [i for i, st in enumerate(sm) if st == ssd][0]
-                        num = 10 * num + f
-                    print(num)
-                    n += num
+                    for word in output_values.split():
+                        # Find the word in the input, and use that to index into the digit order to get the digit
+                        # represented by this word (note that the characters in the word are sorted so that dbac = cbad)
+                        digit = order[input_words.index(sorted(word))]
+                        num = 10 * num + digit
+                    ans += num
                     break
-        return n
+        return ans
 
 
 if __name__ == '__main__':

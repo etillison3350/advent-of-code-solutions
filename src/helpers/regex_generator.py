@@ -528,11 +528,15 @@ def _escape(string: str | int, chars: Optional[Sequence[str]] = None) -> str:
         return string
 
 
+from input import input_text, wait_for_input
+
 if __name__ == '__main__':
+    wait_for_input(8, 2021)
+    input_text(8, 2021)
     dir = '..\\inputs'
     for dirpath, dirnames, filenames in os.walk(dir):
         for file in filenames:
-            if file.startswith('input-202007'):
+            if file.startswith('input-202108'):
                 with open(os.path.join(dirpath, file), 'r') as inp_file:
                     whole_inp = inp_file.read()
                     parts = whole_inp.split('\n\n')

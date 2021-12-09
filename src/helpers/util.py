@@ -8,9 +8,11 @@ _S = TypeVar('_S')
 _T = TypeVar('_T')
 
 
-def adj(co):
-    d = len(co)
-    return {tuple(a[i] + co[i] for i in range(d)) for a in product((-1, 0, 1), repeat=d) if a != ((0,) * d)}
+def adj(coords: Sequence[Any, ...], diag=True) -> set[tuple[Any, ...]]:
+    d = len(coords)
+    return {tuple(a[i] + coords[i] for i in range(d))
+            for a in product((-1, 0, 1), repeat=d)
+            if (all(x != 0 for x in a) if diag else any(x == 0 for x in a))}
 
 
 def as_type(seq: Iterable[_S], type_conv: Callable[[_S], _T]) -> list[_T]:

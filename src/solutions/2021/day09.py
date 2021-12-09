@@ -27,8 +27,8 @@ class Solution(Executor):
         for y, row in enumerate(g):
             for x, col in enumerate(row):
                 m = math.inf
-                for ax, ay in adj((x, y)):
-                    if (ax == x or ay == y) and 0 <= ax < len(row) and 0 <= ay < len(g):
+                for ax, ay in adj((x, y), diag=False):
+                    if 0 <= ax < len(row) and 0 <= ay < len(g):
                         m = min(g[ay][ax], m)
                 if col < m:
                     n += g[y][x] + 1
@@ -48,8 +48,8 @@ class Solution(Executor):
             while len(wl) > 0:
                 co = wl.pop()
                 basin.add(co)
-                for ax, ay in adj(co):
-                    if (ax == co[0] or ay == co[1]) and (ax, ay) in basin_pts:
+                for ax, ay in adj(co, diag=False):
+                    if (ax, ay) in basin_pts:
                         wl.append((ax, ay))
                         basin_pts.remove((ax, ay))
             basins.append(basin)

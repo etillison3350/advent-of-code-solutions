@@ -21,40 +21,39 @@ class Solution(Executor):
         yield self._solve_part2(r, print)
 
     def _solve_part1(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        g = as_grid(r, int)
-        n = 0
+        grid = as_grid(r, int)
 
-        for y, row in enumerate(g):
+        ans = 0
+        for y, row in enumerate(grid):
             for x, col in enumerate(row):
-                m = math.inf
+                min_val = math.inf
                 for ax, ay in adj((x, y), diag=False):
-                    if 0 <= ax < len(row) and 0 <= ay < len(g):
-                        m = min(g[ay][ax], m)
-                if col < m:
-                    n += g[y][x] + 1
-        return n
+                    if 0 <= ax < len(row) and 0 <= ay < len(grid):
+                        min_val = min(grid[ay][ax], min_val)
+                if col < min_val:
+                    ans += col + 1
+        return ans
 
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        g = np.array(as_grid(r, int))
+        grid = np.array(as_grid(r, int))
 
-        basin_pts: set[tuple[Any, ...]] = set(zip(*np.where(g < 9)))
+        basin_pts: set[tuple[Any, ...]] = set(zip(*np.where(grid < 9)))
 
         basins = []
         while len(basin_pts) > 0:
             basin_start = basin_pts.pop()
             basin = set()
 
-            wl = [basin_start]
-            while len(wl) > 0:
-                co = wl.pop()
+            worklist = [basin_start]
+            while len(worklist) > 0:
+                co = worklist.pop()
                 basin.add(co)
-                for ax, ay in adj(co, diag=False):
-                    if (ax, ay) in basin_pts:
-                        wl.append((ax, ay))
-                        basin_pts.remove((ax, ay))
+                for point in adj(co, diag=False):
+                    if point in basin_pts:
+                        worklist.append(point)
+                        basin_pts.remove(point)
             basins.append(basin)
         return np.product(sorted((len(basin) for basin in basins), reverse=True)[:3])
-
 
 
 if __name__ == '__main__':

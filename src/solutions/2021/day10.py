@@ -19,52 +19,34 @@ class Solution(Executor):
         yield self._solve_part2(r, print)
 
     def _solve_part1(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        cm = {
-            ')': 3,
-            ']': 57,
-            '}': 1197,
-            '>': 25137
-        }
+        character_values = {')': 3, ']': 57, '}': 1197, '>': 25137}
 
-        open, close = '([{<', ')]}>'
+        open_parens, close_parens = '([{<', ')]}>'
         ans = 0
         for line in r:
-            st = []
+            stack = []
             for char in line:
-                if char in open:
-                    st.append(char)
-                elif open.index(st.pop()) != close.index(char):
-                    ans += cm[char]
+                if char in open_parens:
+                    stack.append(char)
+                elif open_parens.index(stack.pop()) != close_parens.index(char):
+                    ans += character_values[char]
         return ans
 
-        # ans = 0
-        # cts = [0] * 4
-        # for line in r:
-        #     for char in line:
-        #         if char in '([{<':
-        #             cts['([{<'.index(char)] += 1
-        #         else:
-        #             cts[')]}>'.index(char)] -= 1
-        #             if cts[')]}>'.index(char)] < 0:
-        #                 ans += cm[char]
-        #                 break
-        # return ans
-
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        open, close = '([{<', ')]}>'
+        open_parens, close_parens = '([{<', ')]}>'
         scores = []
         for line in r:
-            st = []
+            stack = []
             for char in line:
-                if char in open:
-                    st.append(char)
-                elif open.index(st.pop()) != close.index(char):
+                if char in open_parens:
+                    stack.append(char)
+                elif open_parens.index(stack.pop()) != close_parens.index(char):
                     break
             else:
                 n = 0
-                while len(st) > 0:
-                    c = st.pop()
-                    n = n * 5 + open.index(c) + 1
+                while len(stack) > 0:
+                    c = stack.pop()
+                    n = n * 5 + open_parens.index(c) + 1
                 scores.append(n)
         return sorted(scores)[len(scores) // 2]
 

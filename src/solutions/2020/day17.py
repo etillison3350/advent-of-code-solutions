@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from helpers import input
-from util import adj
+from helpers.util import adj
 
 
 def run(r: Sequence[str]):

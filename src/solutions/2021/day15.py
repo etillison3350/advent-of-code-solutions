@@ -1,11 +1,8 @@
 from helpers.executor import Executor
 
 from helpers.util import *
-import itertools
-from itertools import *
-import re
-from re import *
 import numpy as np
+import heapq
 
 from typing import Any, Callable, Generator, Sequence
 
@@ -22,9 +19,9 @@ class Solution(Executor):
         grid = np.array(as_grid(r, int))
 
         visited = set()
-        stack = [((0, 0), 0)]
+        stack = [(0, (0, 0))]
         while len(stack) > 0:
-            co, cost = stack.pop()
+            cost, co = heapq.heappop(stack)
             if co in visited:
                 continue
             visited.add(co)
@@ -34,8 +31,7 @@ class Solution(Executor):
 
             for ax, ay in adj(co, False):
                 if 0 <= ax < grid.shape[0] and 0 <= ay < grid.shape[1]:
-                    stack.append(((ax, ay), cost + grid[ax, ay]))
-            stack.sort(key=lambda t: t[1], reverse=True)
+                    heapq.heappush(stack, (cost + grid[ax, ay], (ax, ay)))
 
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
         grid = np.array(as_grid(r, int)) - 1
@@ -44,9 +40,9 @@ class Solution(Executor):
         grid = (np.hstack((grid, grid + 1, grid + 2, grid + 3, grid + 4)) % 9) + 1
 
         visited = set()
-        stack = [((0, 0), 0)]
+        stack = [(0, (0, 0))]
         while len(stack) > 0:
-            co, cost = stack.pop()
+            cost, co = heapq.heappop(stack)
             if co in visited:
                 continue
             visited.add(co)
@@ -56,8 +52,7 @@ class Solution(Executor):
 
             for ax, ay in adj(co, False):
                 if 0 <= ax < grid.shape[0] and 0 <= ay < grid.shape[1]:
-                    stack.append(((ax, ay), cost + grid[ax, ay]))
-            stack.sort(key=lambda t: t[1], reverse=True)
+                    heapq.heappush(stack, (cost + grid[ax, ay], (ax, ay)))
 
 
 if __name__ == '__main__':

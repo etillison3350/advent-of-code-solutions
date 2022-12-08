@@ -1,5 +1,3 @@
-import math
-
 from helpers.executor import SplitExecutor
 
 from helpers.util import *
@@ -11,8 +9,8 @@ import numpy as np
 
 from typing import Any, Callable, Generator, Sequence
 
-day, year = 7, 2021
-split_seq = ','
+day, year = 17, 2021
+split_seq = '\n'
 
 
 class Solution(SplitExecutor):
@@ -21,23 +19,11 @@ class Solution(SplitExecutor):
         yield self._solve_part2(r, print)
 
     def _solve_part1(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        s = np.array(as_type(r, int))
-
-        min = (None, math.inf)
-        for x in range(0, max(s)):
-            if np.sum(np.abs(s - x)) < min[1]:
-                min = (x, np.sum(np.abs(s - x)))
-        return min[1]
+        pass
 
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        s = np.array(as_type(r, int))
-
-        min = (None, math.inf)
-        for x in range(0, max(s)):
-            d = np.abs(s - x)
-            if np.sum(d * (d + 1) / 2) < min[1]:
-                min = (x, np.sum(d * (d + 1) / 2))
-        return min
+        # TODO
+        return None
 
 
 if __name__ == '__main__':

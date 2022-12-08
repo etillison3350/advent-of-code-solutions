@@ -2,6 +2,8 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Any, Callable, Optional, TypeVar
 
 from itertools import islice, product, tee
+import numpy as np
+import re
 
 
 _S = TypeVar('_S')
@@ -12,7 +14,14 @@ def adj(coords: Sequence[Any, ...], diag=True) -> set[tuple[Any, ...]]:
     d = len(coords)
     return {tuple(a[i] + coords[i] for i in range(d))
             for a in product((-1, 0, 1), repeat=d)
-            if (any(x != 0 for x in a) if diag else any(x == 0 for x in a) and not all(x == 0 for x in a))}
+            if (any(x != 0 for x in a) if diag else sum(x != 0 for x in a) == 1)}
+
+
+def adj_np(coords: Sequence[Any, ...], diag=True) -> np.ndarray[int]:
+    d = len(coords)
+    return np.array([[a[i] + coords[i] for i in range(d)]
+                    for a in product((-1, 0, 1), repeat=d)
+                    if (any(x != 0 for x in a) if diag else sum(x != 0 for x in a) == 1)])
 
 
 def as_type(seq: Iterable[_S], type_conv: Callable[[_S], _T]) -> list[_T]:
@@ -21,6 +30,23 @@ def as_type(seq: Iterable[_S], type_conv: Callable[[_S], _T]) -> list[_T]:
 
 def as_grid(seq: Iterable[Iterable[_S]], type_conv: Optional[Callable[[_S], _T]] = None) -> list[list[_T]]:
     return [[type_conv(c) if type_conv else c for c in row] for row in seq]
+
+
+def quict(dict_input: str, key: Callable[[str], _S] = str, val: Callable[[str], _T] = str) -> dict[_S, _T]:
+    return dict((key(k), val(v)) for k, v in
+                (re.split(r':\s?', pair) for pair in re.split(r',\s?', dict_input)))
+
+
+def alph_ord(a: str, lower_off=0, upper_off=0) -> int:
+    return alph_map(lower_off, upper_off)[a]
+
+
+def alph_map(lower_off=0, upper_off=0) -> dict[str, int]:
+    amap = {}
+    for i in range(1, 27):
+        amap[chr(i + 64)] = i + upper_off
+        amap[chr(i + 96)] = i + lower_off
+    return amap
 
 
 def to_singleton_sets(sets: Mapping[_S, Iterable[_T]] | Sequence[Iterable[_T]],

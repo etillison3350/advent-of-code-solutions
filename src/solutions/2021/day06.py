@@ -1,4 +1,4 @@
-from helpers.executor import Executor
+from helpers.executor import SplitExecutor
 
 from helpers.util import *
 import numpy as np
@@ -10,7 +10,7 @@ day, year = 6, 2021
 split_seq = ','
 
 
-class Solution(Executor):
+class Solution(SplitExecutor):
     def solve(self, r: Sequence[str], print: Callable[..., None]) -> Generator[Any, None, None]:
         initial_timers = as_type(r, int)
         yield self._solve(initial_timers, 80)

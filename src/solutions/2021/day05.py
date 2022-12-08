@@ -1,4 +1,4 @@
-from helpers.executor import Executor
+from helpers.executor import SplitExecutor
 
 from helpers.util import *
 import re
@@ -14,7 +14,7 @@ def sign(a):
     return 1 if a > 0 else (-1 if a < 0 else 0)
 
 
-class Solution(Executor):
+class Solution(SplitExecutor):
     def solve(self, r: Sequence[str], print: Callable[..., None]) -> Generator[Any, None, None]:
         yield self._solve_part1(r, print)
         yield self._solve_part2(r, print)

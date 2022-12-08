@@ -1,4 +1,4 @@
-from helpers.executor import Executor
+from helpers.executor import SplitExecutor
 
 from helpers.util import *
 import numpy as np
@@ -10,7 +10,7 @@ day, year = 15, 2021
 split_seq = '\n'
 
 
-class Solution(Executor):
+class Solution(SplitExecutor):
     def solve(self, r: Sequence[str], print: Callable[..., None]) -> Generator[Any, None, None]:
         yield self._solve_part1(r, print)
         yield self._solve_part2(r, print)

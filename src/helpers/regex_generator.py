@@ -536,7 +536,7 @@ if __name__ == '__main__':
     dir = '..\\inputs'
     for dirpath, dirnames, filenames in os.walk(dir):
         for file in filenames:
-            if file.startswith('input-202108'):
+            if file.startswith('input'):
                 with open(os.path.join(dirpath, file), 'r') as inp_file:
                     whole_inp = inp_file.read()
                     parts = whole_inp.split('\n\n')

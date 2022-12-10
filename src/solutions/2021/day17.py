@@ -19,7 +19,8 @@ class Solution(SplitExecutor):
         yield self._solve_part2(r, print)
 
     def _solve_part1(self, r: Sequence[str], print: Callable[..., None]) -> Any:
-        pass
+        # TODO
+        return None
 
     def _solve_part2(self, r: Sequence[str], print: Callable[..., None]) -> Any:
         # TODO

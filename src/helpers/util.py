@@ -49,6 +49,14 @@ def alph_map(lower_off=0, upper_off=0) -> dict[str, int]:
     return amap
 
 
+def udlr(chars: Sequence[str] = 'UDLR'):
+    """
+    dict of (x, y) pairs corresponding to the first four characters in chars,
+    corresponding to up, down, left, right, respectively
+    """
+    return dict(zip(chars, [(0, -1), (0, 1), (-1, 0), (1, 0)]))
+
+
 def to_singleton_sets(sets: Mapping[_S, Iterable[_T]] | Sequence[Iterable[_T]],
                       raise_error=True) -> list[Optional[_T]] | dict[_S, Optional[_T]]:
     """Attempts to find a bijection which is a sub-mapping of the input one-to-many mapping"""

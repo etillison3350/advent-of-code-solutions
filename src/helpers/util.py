@@ -17,7 +17,7 @@ def adj(coords: Sequence[Any, ...], diag=True) -> set[tuple[Any, ...]]:
             if (any(x != 0 for x in a) if diag else sum(x != 0 for x in a) == 1)}
 
 
-def adj_np(coords: Sequence[Any, ...], diag=True) -> np.ndarray[int]:
+def adj_np(coords: Sequence[Any, ...], diag=True) -> np.ndarray:
     d = len(coords)
     return np.array([[a[i] + coords[i] for i in range(d)]
                     for a in product((-1, 0, 1), repeat=d)

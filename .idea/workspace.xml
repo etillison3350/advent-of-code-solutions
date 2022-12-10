@@ -4,14 +4,17 @@
     <option name="GROUP_BY_SEVERITY" value="true" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f663466d-c717-43e0-84a2-56d1a6ba7bf7" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/basic_input.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/extern_input.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/list_input.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="f663466d-c717-43e0-84a2-56d1a6ba7bf7" name="Changes" comment="Refactor">
+      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/ast_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/inference.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/helpers/input_parse/pattern_finder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/helpers/input_parse.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/experiment.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/experiment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers/input_parse/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers/input_parse/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers/input_parse/input_basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers/input_parse/input_parse.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers/input_parse/input_extern.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers/input_parse/input_list.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers/util.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers/util.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +67,7 @@
       <recent name="C:\Users\ethan\Documents\Programming\AdventOfCode\src\helpers\input_parse" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.experiment">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Solutions" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,6 +102,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/solutions/2021/day16.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="experiment" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Solutions" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/experiment.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -182,6 +206,15 @@
       <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.day16" />
+      <item itemvalue="Python.experiment" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.experiment" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -192,6 +225,28 @@
       <option name="presentableId" value="Default" />
       <updated>1639618678261</updated>
     </task>
+    <task id="LOCAL-00001" summary="Refactor">
+      <created>1670535173002</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1670535173002</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Refactor">
+      <created>1670535237863</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1670535237863</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Refactor">
+      <created>1670535243622</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1670535243622</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -204,5 +259,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor" />
   </component>
 </project>
